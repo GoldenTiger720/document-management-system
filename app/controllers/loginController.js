@@ -10,25 +10,20 @@ app.controller('LoginController', ['$scope', '$location', 'AuthService',
 
     $scope.credentials = {
         username: '',
-        password: ''
+        password: '',
+        role: '',
+        department: ''
     };
 
     $scope.error = '';
     $scope.loading = false;
 
-    // Demo credentials info
-    $scope.demoAccounts = [
-        { username: 'admin1', password: 'admin123', role: 'Admin (Finance)' },
-        { username: 'admin2', password: 'admin123', role: 'Admin (HR)' },
-        { username: 'operator1', password: 'oper123', role: 'Operator (Finance)' },
-        { username: 'operator2', password: 'oper123', role: 'Operator (HR)' }
-    ];
-
     $scope.login = function() {
         $scope.error = '';
 
-        if (!$scope.credentials.username || !$scope.credentials.password) {
-            $scope.error = 'Please enter username and password';
+        if (!$scope.credentials.username || !$scope.credentials.password ||
+            !$scope.credentials.role || !$scope.credentials.department) {
+            $scope.error = 'Please fill in all fields';
             return;
         }
 
@@ -37,21 +32,20 @@ app.controller('LoginController', ['$scope', '$location', 'AuthService',
         // Simulate API call delay
         setTimeout(function() {
             $scope.$apply(function() {
-                var success = AuthService.login($scope.credentials.username, $scope.credentials.password);
+                var success = AuthService.login(
+                    $scope.credentials.username,
+                    $scope.credentials.password,
+                    $scope.credentials.role,
+                    $scope.credentials.department
+                );
 
                 if (success) {
                     $location.path('/dashboard');
                 } else {
-                    $scope.error = 'Invalid username or password';
+                    $scope.error = 'Invalid credentials or user already exists';
                     $scope.loading = false;
                 }
             });
         }, 800);
-    };
-
-    $scope.quickLogin = function(username, password) {
-        $scope.credentials.username = username;
-        $scope.credentials.password = password;
-        $scope.login();
     };
 }]);

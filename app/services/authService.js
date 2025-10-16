@@ -50,20 +50,49 @@ app.service('AuthService', ['$q', '$location', '$rootScope', function($q, $locat
         }
     ];
 
-    this.login = function(username, password) {
-        var user = users.find(function(u) {
-            return u.username === username && u.password === password && u.active;
+    var nextUserId = 5;
+
+    this.login = function(username, password, role, department) {
+        // Check if user already exists
+        var existingUser = users.find(function(u) {
+            return u.username === username;
         });
 
-        if (user) {
-            currentUser = angular.copy(user);
+        if (existingUser) {
+            // Existing user - verify password
+            if (existingUser.password === password && existingUser.active) {
+                currentUser = angular.copy(existingUser);
+                delete currentUser.password;
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                $rootScope.currentUser = currentUser;
+                $rootScope.isAuthenticated = true;
+                return true;
+            }
+            return false;
+        } else {
+            // New user - create account
+            var newUser = {
+                id: nextUserId++,
+                username: username,
+                password: password,
+                name: username.charAt(0).toUpperCase() + username.slice(1), // Capitalize first letter
+                email: username + '@company.com',
+                role: role,
+                department: department,
+                active: true,
+                createdAt: new Date()
+            };
+
+            users.push(newUser);
+
+            // Log them in
+            currentUser = angular.copy(newUser);
             delete currentUser.password;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             $rootScope.currentUser = currentUser;
             $rootScope.isAuthenticated = true;
             return true;
         }
-        return false;
     };
 
     this.logout = function() {

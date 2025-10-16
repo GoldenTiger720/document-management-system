@@ -14,8 +14,14 @@ app.controller('MainController', ['$scope', '$rootScope', '$location', 'AuthServ
     };
 
     // User menu toggle
-    $scope.toggleUserMenu = function() {
+    $scope.toggleUserMenu = function(event) {
+        event.stopPropagation();
         $scope.showUserMenu = !$scope.showUserMenu;
+    };
+
+    // Close user menu when clicking on menu items
+    $scope.closeUserMenu = function() {
+        $scope.showUserMenu = false;
     };
 
     // Close user menu when clicking elsewhere
@@ -30,6 +36,7 @@ app.controller('MainController', ['$scope', '$rootScope', '$location', 'AuthServ
 
     // Logout
     $scope.logout = function() {
+        $scope.showUserMenu = false;
         AuthService.logout();
     };
 

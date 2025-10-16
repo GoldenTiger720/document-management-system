@@ -73,9 +73,9 @@
 
                 <!-- User Menu -->
                 <div class="user-menu">
-                    <div class="user-avatar" ng-click="toggleUserMenu()">
+                    <div class="user-avatar" ng-click="toggleUserMenu($event)">
                         <i class="fas fa-user-circle"></i>
-                        <span>{{currentUser.name}}</span>
+                        <span>{{currentUser.username || currentUser.name}}</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div class="user-dropdown" ng-show="showUserMenu">
@@ -85,8 +85,8 @@
                             <p class="user-dept">{{currentUser.department}}</p>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <a href="#!/profile"><i class="fas fa-user"></i> Profile</a>
-                        <a href="#!/settings"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#!/profile" ng-click="closeUserMenu()"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#!/settings" ng-click="closeUserMenu()"><i class="fas fa-cog"></i> Settings</a>
                         <div class="dropdown-divider"></div>
                         <a href="#" ng-click="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
