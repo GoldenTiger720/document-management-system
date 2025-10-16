@@ -1,0 +1,184 @@
+<div class="dashboard-page" style="background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80');">
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-home"></i>
+                Dashboard
+            </h1>
+            <p>Welcome back, {{currentUser.name}}!</p>
+        </div>
+        <button class="btn btn-primary" ng-click="refresh()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+
+    <div class="loading-overlay" ng-if="loading">
+        <div class="spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card" ng-repeat="stat in quickStats" ng-style="{'border-left-color': stat.color}">
+            <div class="stat-card-content">
+                <div class="stat-icon" ng-style="{'background-color': stat.color}">
+                    <i class="fas" ng-class="stat.icon"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{stat.value}}</h3>
+                    <p>{{stat.title}}</p>
+                </div>
+            </div>
+            <div class="stat-image" style="background-image: url('{{stat.bgImage}}');"></div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Documents -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-file-alt"></i>
+                    Recent Documents
+                </h2>
+                <a href="#!/documents" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="document-list">
+                    <div class="document-item" ng-repeat="doc in recentDocuments">
+                        <div class="document-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="document-info">
+                            <h4>{{doc.name}}</h4>
+                            <p>
+                                <i class="fas fa-user"></i> {{doc.uploadedBy}} •
+                                <i class="fas fa-calendar"></i> {{doc.uploadedAt | date:'MMM d, yyyy'}}
+                            </p>
+                        </div>
+                        <span class="badge" ng-class="{
+                            'badge-success': doc.status === 'signed',
+                            'badge-warning': doc.status === 'pending'
+                        }">
+                            <i class="fas" ng-class="{
+                                'fa-check-circle': doc.status === 'signed',
+                                'fa-clock': doc.status === 'pending'
+                            }"></i>
+                            {{doc.status | uppercase}}
+                        </span>
+                    </div>
+                    <div class="empty-state" ng-if="recentDocuments.length === 0">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No documents yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-history"></i>
+                    Recent Activity
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    <div class="activity-item" ng-repeat="activity in recentActivity">
+                        <div class="activity-icon" ng-class="'activity-' + activity.type">
+                            <i class="fas" ng-class="activity.icon"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>{{activity.title}}</h4>
+                            <p>{{activity.description}}</p>
+                            <span class="activity-time">{{activity.timestamp | date:'MMM d, yyyy h:mm a'}}</span>
+                        </div>
+                    </div>
+                    <div class="empty-state" ng-if="recentActivity.length === 0">
+                        <i class="fas fa-clock"></i>
+                        <p>No recent activity</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-bell"></i>
+                    Recent Notifications
+                </h2>
+                <a href="#!/notifications" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="notification-list-mini">
+                    <div class="notification-mini-item" ng-repeat="notification in recentNotifications" ng-class="{'unread': !notification.read}">
+                        <div class="notification-mini-icon" ng-class="'notification-' + notification.type">
+                            <i class="fas" ng-class="{
+                                'fa-check-circle': notification.type === 'success',
+                                'fa-exclamation-triangle': notification.type === 'warning',
+                                'fa-times-circle': notification.type === 'error',
+                                'fa-info-circle': notification.type === 'info'
+                            }"></i>
+                        </div>
+                        <div class="notification-mini-content">
+                            <h4>{{notification.title}}</h4>
+                            <p>{{notification.message}}</p>
+                            <span class="notification-mini-time">{{notification.timestamp | date:'short'}}</span>
+                        </div>
+                    </div>
+                    <div class="empty-state" ng-if="recentNotifications.length === 0">
+                        <i class="fas fa-inbox"></i>
+                        <p>No notifications</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Info -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-building"></i>
+                    Department Overview
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="department-info">
+                    <div class="info-item">
+                        <i class="fas fa-building"></i>
+                        <div>
+                            <label>Department</label>
+                            <strong>{{currentUser.department}}</strong>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-shield"></i>
+                        <div>
+                            <label>Your Role</label>
+                            <strong>{{currentUser.role | uppercase}}</strong>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <label>Total Users</label>
+                            <strong>{{userStats.total}}</strong>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-file-contract"></i>
+                        <div>
+                            <label>Documents This Month</label>
+                            <strong>{{documentStats.thisMonth}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,352 @@
+<div class="documents-page" style="background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1920&q=80');">
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-file-contract"></i>
+                Documents
+            </h1>
+            <p>Manage and view documents in your department</p>
+        </div>
+        <button class="btn btn-primary" ng-click="openUploadModal()">
+            <i class="fas fa-upload"></i> Upload Document
+        </button>
+    </div>
+
+    <!-- Document Statistics -->
+    <div class="document-stats">
+        <div class="stat-item">
+            <i class="fas fa-file-alt"></i>
+            <div>
+                <strong>{{getDocumentStats().total}}</strong>
+                <span>Total Documents</span>
+            </div>
+        </div>
+        <div class="stat-item success">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>{{getDocumentStats().signed}}</strong>
+                <span>Signed</span>
+            </div>
+        </div>
+        <div class="stat-item warning">
+            <i class="fas fa-clock"></i>
+            <div>
+                <strong>{{getDocumentStats().pending}}</strong>
+                <span>Pending Signature</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-calendar"></i>
+            <div>
+                <strong>{{getDocumentStats().thisMonth}}</strong>
+                <span>This Month</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text"
+                   ng-model="searchQuery"
+                   placeholder="Search documents by name or key...">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn" ng-class="{'active': statusFilter === 'all'}" ng-click="statusFilter = 'all'">
+                All Documents
+            </button>
+            <button class="filter-btn" ng-class="{'active': statusFilter === 'signed'}" ng-click="statusFilter = 'signed'">
+                <i class="fas fa-check-circle"></i> Signed
+            </button>
+            <button class="filter-btn" ng-class="{'active': statusFilter === 'pending'}" ng-click="statusFilter = 'pending'">
+                <i class="fas fa-clock"></i> Pending
+            </button>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="documents-table">
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-file"></i> Document Name</th>
+                    <th><i class="fas fa-key"></i> Document Key</th>
+                    <th><i class="fas fa-user"></i> Uploaded By</th>
+                    <th><i class="fas fa-calendar"></i> Upload Date</th>
+                    <th><i class="fas fa-info-circle"></i> Status</th>
+                    <th><i class="fas fa-cog"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="doc in filteredDocuments">
+                    <td>
+                        <div class="document-name">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>{{doc.name}}</span>
+                        </div>
+                    </td>
+                    <td><code>{{doc.documentKey}}</code></td>
+                    <td>{{doc.uploadedBy}}</td>
+                    <td>{{doc.uploadedAt | date:'MMM d, yyyy'}}</td>
+                    <td>
+                        <span class="badge" ng-class="{
+                            'badge-success': doc.status === 'signed',
+                            'badge-warning': doc.status === 'pending'
+                        }">
+                            <i class="fas" ng-class="{
+                                'fa-check-circle': doc.status === 'signed',
+                                'fa-clock': doc.status === 'pending'
+                            }"></i>
+                            {{doc.status | uppercase}}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline" ng-click="openDetailsModal(doc)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-primary"
+                                    ng-if="doc.status === 'pending' && currentUser.role === 'administrator'"
+                                    ng-click="openSignModal(doc)"
+                                    title="Sign Document">
+                                <i class="fas fa-pen-nib"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success"
+                                    ng-if="doc.status === 'signed'"
+                                    ng-click="viewPDF(doc)"
+                                    title="View PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" ng-if="filteredDocuments.length === 0">
+            <i class="fas fa-folder-open"></i>
+            <h3>No documents found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+    </div>
+
+    <!-- Upload Document Modal -->
+    <div class="modal" ng-show="showUploadModal">
+        <div class="modal-overlay" ng-click="closeUploadModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-upload"></i>
+                    Upload Document
+                </h2>
+                <button class="modal-close" ng-click="closeUploadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form ng-submit="uploadDocument()" class="modal-body">
+                <div class="form-group">
+                    <label for="docName">Document Name *</label>
+                    <input type="text" id="docName" ng-model="uploadForm.name" required>
+                </div>
+                <div class="form-group">
+                    <label for="docKey">Document Key *</label>
+                    <input type="text" id="docKey" ng-model="uploadForm.documentKey" required>
+                    <small>Format: DEPT-YYYY-XXX (e.g., FIN-2024-001)</small>
+                </div>
+                <div class="form-group">
+                    <label>Attachments</label>
+                    <div class="attachment-list">
+                        <div class="attachment-item" ng-repeat="attachment in uploadForm.attachments">
+                            <i class="fas fa-paperclip"></i>
+                            <span>{{attachment}}</span>
+                            <button type="button" ng-click="removeAttachment($index)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline" ng-click="addAttachment()">
+                        <i class="fas fa-plus"></i> Add Attachment
+                    </button>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" ng-click="closeUploadModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sign Document Modal -->
+    <div class="modal" ng-show="showSignModal">
+        <div class="modal-overlay" ng-click="closeSignModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-pen-nib"></i>
+                    Sign Document
+                </h2>
+                <button class="modal-close" ng-click="closeSignModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form ng-submit="signDocument()" class="modal-body">
+                <div class="document-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <div>
+                        <h3>{{selectedDocument.name}}</h3>
+                        <p>Document Key: <code>{{selectedDocument.documentKey}}</code></p>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>To sign this document, you must enter your administrator password and the document key for verification.</p>
+                </div>
+                <div class="form-group">
+                    <label for="signPassword">Administrator Password *</label>
+                    <input type="password" id="signPassword" ng-model="signForm.password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signDocKey">Document Key *</label>
+                    <input type="text" id="signDocKey" ng-model="signForm.documentKey" required>
+                    <small>Enter the document key to verify</small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" ng-click="closeSignModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-pen-nib"></i> Sign Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Document Details Modal -->
+    <div class="modal" ng-show="showDetailsModal">
+        <div class="modal-overlay" ng-click="closeDetailsModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-file-alt"></i>
+                    Document Details
+                </h2>
+                <button class="modal-close" ng-click="closeDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h3>Document Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Document Name</label>
+                            <p>{{selectedDocument.name}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Document Key</label>
+                            <p><code>{{selectedDocument.documentKey}}</code></p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Type</label>
+                            <p>{{selectedDocument.type}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Size</label>
+                            <p>{{selectedDocument.size}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Uploaded By</label>
+                            <p>{{selectedDocument.uploadedBy}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Upload Date</label>
+                            <p>{{selectedDocument.uploadedAt | date:'MMM d, yyyy h:mm a'}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Status</label>
+                            <p>
+                                <span class="badge" ng-class="{
+                                    'badge-success': selectedDocument.status === 'signed',
+                                    'badge-warning': selectedDocument.status === 'pending'
+                                }">
+                                    {{selectedDocument.status | uppercase}}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Department</label>
+                            <p>{{selectedDocument.department}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" ng-if="selectedDocument.attachments && selectedDocument.attachments.length > 0">
+                    <h3>Attachments</h3>
+                    <div class="attachment-list">
+                        <div class="attachment-item" ng-repeat="attachment in selectedDocument.attachments">
+                            <i class="fas fa-paperclip"></i>
+                            <span>{{attachment}}</span>
+                            <button type="button" ng-click="downloadAttachment(attachment)">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section" ng-if="selectedDocument.status === 'signed'">
+                    <h3>Signature Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Signed By</label>
+                            <p>{{selectedDocument.signedBy}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Signature Date</label>
+                            <p>{{selectedDocument.signedAt | date:'MMM d, yyyy h:mm a'}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Signature Hash</label>
+                            <p><code>{{selectedDocument.signature}}</code></p>
+                        </div>
+                    </div>
+
+                    <div class="signature-evidence" ng-if="signatureEvidence">
+                        <h4>Signature Evidence</h4>
+                        <div class="evidence-grid">
+                            <div class="evidence-item">
+                                <i class="fas fa-network-wired"></i>
+                                <div>
+                                    <label>IP Address</label>
+                                    <p>{{signatureEvidence.ipAddress}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <label>Timestamp</label>
+                                    <p>{{signatureEvidence.timestamp | date:'full'}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <label>Method</label>
+                                    <p>{{signatureEvidence.method}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-certificate"></i>
+                                <div>
+                                    <label>Certificate</label>
+                                    <p>{{signatureEvidence.certificate}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

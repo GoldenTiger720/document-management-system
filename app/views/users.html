@@ -1,0 +1,193 @@
+<div class="users-page" style="background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80');">
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-users"></i>
+                User Management
+            </h1>
+            <p>Manage users in your department</p>
+        </div>
+        <button class="btn btn-primary" ng-click="openCreateModal()">
+            <i class="fas fa-user-plus"></i> Create New User
+        </button>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="user-stats">
+        <div class="stat-item">
+            <i class="fas fa-users"></i>
+            <div>
+                <strong>{{getUserStats().total}}</strong>
+                <span>Total Users</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>{{getUserStats().active}}</strong>
+                <span>Active</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-user-shield"></i>
+            <div>
+                <strong>{{getUserStats().administrators}}</strong>
+                <span>Administrators</span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-user"></i>
+            <div>
+                <strong>{{getUserStats().operators}}</strong>
+                <span>Operators</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text"
+                   ng-model="searchQuery"
+                   placeholder="Search users by name, username, or email...">
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn" ng-class="{'active': filters.status === 'all'}" ng-click="filters.status = 'all'">
+                All
+            </button>
+            <button class="filter-btn" ng-class="{'active': filters.status === 'active'}" ng-click="filters.status = 'active'">
+                Active
+            </button>
+            <button class="filter-btn" ng-class="{'active': filters.status === 'inactive'}" ng-click="filters.status = 'inactive'">
+                Inactive
+            </button>
+        </div>
+        <div class="filter-buttons">
+            <button class="filter-btn" ng-class="{'active': filters.role === 'all'}" ng-click="filters.role = 'all'">
+                All Roles
+            </button>
+            <button class="filter-btn" ng-class="{'active': filters.role === 'administrator'}" ng-click="filters.role = 'administrator'">
+                Administrators
+            </button>
+            <button class="filter-btn" ng-class="{'active': filters.role === 'operator'}" ng-click="filters.role = 'operator'">
+                Operators
+            </button>
+        </div>
+    </div>
+
+    <!-- Users Grid -->
+    <div class="users-grid">
+        <user-card
+            ng-repeat="user in filteredUsers"
+            user="user"
+            on-edit="openEditModal(user)"
+            on-deactivate="deactivateUser(user)"
+            on-reactivate="reactivateUser(user)">
+        </user-card>
+    </div>
+
+    <div class="empty-state" ng-if="filteredUsers.length === 0">
+        <i class="fas fa-user-slash"></i>
+        <h3>No users found</h3>
+        <p>Try adjusting your search or filters</p>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal" ng-show="showCreateModal">
+        <div class="modal-overlay" ng-click="closeCreateModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-user-plus"></i>
+                    Create New User
+                </h2>
+                <button class="modal-close" ng-click="closeCreateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form ng-submit="createUser()" class="modal-body">
+                <div class="form-group">
+                    <label for="newUsername">Username *</label>
+                    <input type="text" id="newUsername" ng-model="newUser.username" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password *</label>
+                    <input type="password" id="newPassword" ng-model="newUser.password" required>
+                </div>
+                <div class="form-group">
+                    <label for="newName">Full Name *</label>
+                    <input type="text" id="newName" ng-model="newUser.name" required>
+                </div>
+                <div class="form-group">
+                    <label for="newEmail">Email *</label>
+                    <input type="email" id="newEmail" ng-model="newUser.email" required>
+                </div>
+                <div class="form-group">
+                    <label for="newRole">Role *</label>
+                    <select id="newRole" ng-model="newUser.role" required>
+                        <option value="operator">Operator</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>User will be created in your department: <strong>{{currentUser.department}}</strong></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" ng-click="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" ng-show="showEditModal">
+        <div class="modal-overlay" ng-click="closeEditModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-user-edit"></i>
+                    Edit User
+                </h2>
+                <button class="modal-close" ng-click="closeEditModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form ng-submit="updateUser()" class="modal-body">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" ng-model="editUser.username" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="editName">Full Name *</label>
+                    <input type="text" id="editName" ng-model="editUser.name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email *</label>
+                    <input type="email" id="editEmail" ng-model="editUser.email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Role *</label>
+                    <select id="editRole" ng-model="editUser.role" required>
+                        <option value="operator">Operator</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPassword">New Password (leave blank to keep current)</label>
+                    <input type="password" id="editPassword" ng-model="editUser.password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" ng-click="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

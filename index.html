@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html ng-app="docManagementApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Management System</title>
+
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/themes.css">
+
+    <!-- App Scripts -->
+    <script src="app/app.js"></script>
+    <script src="app/services/authService.js"></script>
+    <script src="app/services/userService.js"></script>
+    <script src="app/services/departmentService.js"></script>
+    <script src="app/services/documentService.js"></script>
+    <script src="app/services/notificationService.js"></script>
+    <script src="app/services/themeService.js"></script>
+    <script src="app/controllers/mainController.js"></script>
+    <script src="app/controllers/loginController.js"></script>
+    <script src="app/controllers/dashboardController.js"></script>
+    <script src="app/controllers/userController.js"></script>
+    <script src="app/controllers/documentSigningController.js"></script>
+    <script src="app/controllers/notificationController.js"></script>
+    <script src="app/directives/userCard.js"></script>
+    <script src="app/directives/notificationBell.js"></script>
+</head>
+<body ng-controller="MainController" ng-class="{'dark-theme': isDarkTheme}">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" ng-if="isAuthenticated">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-file-signature"></i>
+                <span>DocuSign Pro</span>
+            </div>
+
+            <div class="navbar-menu">
+                <a href="#!/dashboard" ng-class="{'active': currentPath === '/dashboard'}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#!/users" ng-class="{'active': currentPath === '/users'}" ng-if="currentUser.role === 'administrator'">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="#!/documents" ng-class="{'active': currentPath === '/documents'}">
+                    <i class="fas fa-file-contract"></i> Documents
+                </a>
+                <a href="#!/sign-document" ng-class="{'active': currentPath === '/sign-document'}" ng-if="currentUser.role === 'administrator'">
+                    <i class="fas fa-pen-nib"></i> Sign Document
+                </a>
+            </div>
+
+            <div class="navbar-actions">
+                <!-- Notification Bell -->
+                <notification-bell></notification-bell>
+
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" ng-click="toggleTheme()" title="Toggle Theme">
+                    <i class="fas" ng-class="isDarkTheme ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+
+                <!-- User Menu -->
+                <div class="user-menu">
+                    <div class="user-avatar" ng-click="toggleUserMenu()">
+                        <i class="fas fa-user-circle"></i>
+                        <span>{{currentUser.name}}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="user-dropdown" ng-show="showUserMenu">
+                        <div class="user-info">
+                            <p class="user-name">{{currentUser.name}}</p>
+                            <p class="user-role">{{currentUser.role | uppercase}}</p>
+                            <p class="user-dept">{{currentUser.department}}</p>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="#!/profile"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#!/settings"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" ng-click="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-container" ng-class="{'no-nav': !isAuthenticated}">
+        <div ng-view></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+        <div class="toast" ng-repeat="toast in toasts" ng-class="toast.type" ng-show="toast.show">
+            <i class="fas" ng-class="{
+                'fa-check-circle': toast.type === 'success',
+                'fa-exclamation-circle': toast.type === 'warning',
+                'fa-times-circle': toast.type === 'error',
+                'fa-info-circle': toast.type === 'info'
+            }"></i>
+            <span>{{toast.message}}</span>
+            <button ng-click="closeToast($index)"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+</body>
+</html>

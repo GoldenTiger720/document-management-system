@@ -1,0 +1,185 @@
+<div class="notifications-page" style="background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1920&q=80');">
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-bell"></i>
+                Notifications
+            </h1>
+            <p>Stay updated with system notifications and alerts</p>
+        </div>
+        <button class="btn btn-primary" ng-click="markAllAsRead()" ng-if="(notifications | filter:{read: false}).length > 0">
+            <i class="fas fa-check-double"></i> Mark All as Read
+        </button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="notification-filters">
+        <button class="filter-tab" ng-class="{'active': filterType === 'all'}" ng-click="filterType = 'all'">
+            <i class="fas fa-inbox"></i>
+            All ({{notifications.length}})
+        </button>
+        <button class="filter-tab" ng-class="{'active': filterType === 'unread'}" ng-click="filterType = 'unread'">
+            <i class="fas fa-envelope"></i>
+            Unread ({{(notifications | filter:{read: false}).length}})
+        </button>
+        <button class="filter-tab" ng-class="{'active': filterType === 'success'}" ng-click="filterType = 'success'">
+            <i class="fas fa-check-circle"></i>
+            Success
+        </button>
+        <button class="filter-tab" ng-class="{'active': filterType === 'warning'}" ng-click="filterType = 'warning'">
+            <i class="fas fa-exclamation-triangle"></i>
+            Warnings
+        </button>
+        <button class="filter-tab" ng-class="{'active': filterType === 'info'}" ng-click="filterType = 'info'">
+            <i class="fas fa-info-circle"></i>
+            Info
+        </button>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list">
+        <div class="notification-card"
+             ng-repeat="notification in filteredNotifications"
+             ng-class="{'unread': !notification.read, 'notification-type-' + notification.type}"
+             ng-click="openNotificationDetails(notification)">
+            <div class="notification-indicator" ng-if="!notification.read"></div>
+            <div class="notification-card-icon" ng-class="'icon-' + notification.type">
+                <i class="fas" ng-class="getNotificationIcon(notification.type)"></i>
+            </div>
+            <div class="notification-card-content">
+                <div class="notification-card-header">
+                    <h3>{{notification.title}}</h3>
+                    <span class="notification-time">{{notification.timestamp | date:'MMM d, h:mm a'}}</span>
+                </div>
+                <p class="notification-message">{{notification.message}}</p>
+                <div class="notification-meta" ng-if="notification.relatedDocument">
+                    <span class="meta-tag">
+                        <i class="fas fa-file"></i>
+                        {{notification.relatedDocument.name}}
+                    </span>
+                    <span class="meta-tag" ng-if="notification.relatedDocument.documentKey">
+                        <i class="fas fa-key"></i>
+                        {{notification.relatedDocument.documentKey}}
+                    </span>
+                </div>
+            </div>
+            <div class="notification-actions">
+                <button class="btn-icon" ng-click="deleteNotification(notification, $event)" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="empty-state" ng-if="filteredNotifications.length === 0">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No notifications</h3>
+            <p>You're all caught up!</p>
+        </div>
+    </div>
+
+    <!-- Notification Details Modal -->
+    <div class="modal" ng-show="showDetailsModal">
+        <div class="modal-overlay" ng-click="closeDetailsModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas" ng-class="getNotificationIcon(selectedNotification.type)"></i>
+                    Notification Details
+                </h2>
+                <button class="modal-close" ng-click="closeDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="notification-detail-header" ng-class="'detail-' + selectedNotification.type">
+                    <div class="detail-icon">
+                        <i class="fas" ng-class="getNotificationIcon(selectedNotification.type)"></i>
+                    </div>
+                    <div>
+                        <h3>{{selectedNotification.title}}</h3>
+                        <p class="text-muted">{{selectedNotification.timestamp | date:'full'}}</p>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Message</h4>
+                    <p class="notification-detail-message">{{selectedNotification.message}}</p>
+                </div>
+
+                <div class="detail-section" ng-if="selectedNotification.relatedDocument">
+                    <h4>Related Document</h4>
+                    <div class="related-document-card">
+                        <div class="doc-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="doc-details">
+                            <h5>{{selectedNotification.relatedDocument.name}}</h5>
+                            <p><strong>Document Key:</strong> <code>{{selectedNotification.relatedDocument.documentKey}}</code></p>
+
+                            <div class="doc-attachments" ng-if="selectedNotification.relatedDocument.attachments && selectedNotification.relatedDocument.attachments.length > 0">
+                                <h6><i class="fas fa-paperclip"></i> Attachments</h6>
+                                <div class="attachment-list">
+                                    <div class="attachment-item" ng-repeat="attachment in selectedNotification.relatedDocument.attachments">
+                                        <i class="fas fa-file"></i>
+                                        <span>{{attachment}}</span>
+                                        <button type="button" class="btn btn-sm btn-outline" ng-click="downloadAttachment(attachment)">
+                                            <i class="fas fa-download"></i> Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="doc-actions" ng-if="selectedNotification.relatedDocument.pdfUrl">
+                                <button class="btn btn-primary" ng-click="viewPDF(selectedNotification)">
+                                    <i class="fas fa-file-pdf"></i> View PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Notification Information</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Type</label>
+                            <span class="badge" ng-class="{
+                                'badge-success': selectedNotification.type === 'success',
+                                'badge-warning': selectedNotification.type === 'warning',
+                                'badge-danger': selectedNotification.type === 'error',
+                                'badge-info': selectedNotification.type === 'info'
+                            }">
+                                {{selectedNotification.type | uppercase}}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <label>Department</label>
+                            <p>{{selectedNotification.department}}</p>
+                        </div>
+                        <div class="info-item">
+                            <label>Status</label>
+                            <span class="badge" ng-class="{
+                                'badge-success': selectedNotification.read,
+                                'badge-primary': !selectedNotification.read
+                            }">
+                                {{selectedNotification.read ? 'Read' : 'Unread'}}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <label>Date & Time</label>
+                            <p>{{selectedNotification.timestamp | date:'medium'}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" ng-click="deleteNotification(selectedNotification); closeDetailsModal()">
+                    <i class="fas fa-trash"></i> Delete Notification
+                </button>
+                <button class="btn btn-secondary" ng-click="closeDetailsModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

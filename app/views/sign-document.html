@@ -1,0 +1,226 @@
+<div class="sign-document-page" style="background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1920&q=80');">
+    <div class="page-header">
+        <div>
+            <h1>
+                <i class="fas fa-pen-nib"></i>
+                Sign Document
+            </h1>
+            <p>Sign pending documents with digital signature</p>
+        </div>
+    </div>
+
+    <div class="sign-document-container">
+        <div class="pending-documents-section">
+            <h2>
+                <i class="fas fa-clock"></i>
+                Pending Signatures
+            </h2>
+            <div class="pending-documents-list">
+                <div class="pending-document-card"
+                     ng-repeat="doc in filteredDocuments | filter:{status: 'pending'}"
+                     ng-click="openSignModal(doc)">
+                    <div class="pending-doc-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="pending-doc-info">
+                        <h3>{{doc.name}}</h3>
+                        <p><strong>Key:</strong> <code>{{doc.documentKey}}</code></p>
+                        <p><i class="fas fa-user"></i> Uploaded by {{doc.uploadedBy}}</p>
+                        <p><i class="fas fa-calendar"></i> {{doc.uploadedAt | date:'MMM d, yyyy'}}</p>
+                        <div class="doc-attachments" ng-if="doc.attachments && doc.attachments.length > 0">
+                            <i class="fas fa-paperclip"></i>
+                            <span>{{doc.attachments.length}} attachment(s)</span>
+                        </div>
+                    </div>
+                    <div class="pending-doc-action">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-pen-nib"></i>
+                            Sign Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state" ng-if="(filteredDocuments | filter:{status: 'pending'}).length === 0">
+                    <i class="fas fa-check-double"></i>
+                    <h3>All documents are signed</h3>
+                    <p>There are no pending documents awaiting your signature</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="signed-documents-section">
+            <h2>
+                <i class="fas fa-check-circle"></i>
+                Recently Signed
+            </h2>
+            <div class="signed-documents-list">
+                <div class="signed-document-item"
+                     ng-repeat="doc in filteredDocuments | filter:{status: 'signed'} | limitTo:5">
+                    <div class="signed-doc-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="signed-doc-info">
+                        <h4>{{doc.name}}</h4>
+                        <p>Signed by {{doc.signedBy}}</p>
+                        <p class="text-muted">{{doc.signedAt | date:'MMM d, yyyy h:mm a'}}</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline" ng-click="openDetailsModal(doc)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="empty-state" ng-if="(filteredDocuments | filter:{status: 'signed'}).length === 0">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No signed documents yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Modal (reused from documents.html) -->
+    <div class="modal" ng-show="showSignModal">
+        <div class="modal-overlay" ng-click="closeSignModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-pen-nib"></i>
+                    Sign Document
+                </h2>
+                <button class="modal-close" ng-click="closeSignModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form ng-submit="signDocument()" class="modal-body">
+                <div class="document-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <div>
+                        <h3>{{selectedDocument.name}}</h3>
+                        <p>Document Key: <code>{{selectedDocument.documentKey}}</code></p>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p><strong>Security Verification Required:</strong> To sign this document, you must enter your administrator password and the document key for verification.</p>
+                </div>
+                <div class="form-group">
+                    <label for="signPassword">
+                        <i class="fas fa-lock"></i> Administrator Password *
+                    </label>
+                    <input type="password" id="signPassword" ng-model="signForm.password" required placeholder="Enter your password">
+                </div>
+                <div class="form-group">
+                    <label for="signDocKey">
+                        <i class="fas fa-key"></i> Document Key *
+                    </label>
+                    <input type="text" id="signDocKey" ng-model="signForm.documentKey" required placeholder="Enter document key">
+                    <small>Enter the document key to verify: {{selectedDocument.documentKey}}</small>
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Signing this document will create a cryptographic signature with timestamp and IP evidence.</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" ng-click="closeSignModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-pen-nib"></i> Sign Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Document Details Modal (reused) -->
+    <div class="modal" ng-show="showDetailsModal">
+        <div class="modal-overlay" ng-click="closeDetailsModal()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-file-alt"></i>
+                    Document Details
+                </h2>
+                <button class="modal-close" ng-click="closeDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h3>Document Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Document Name</label>
+                            <p>{{selectedDocument.name}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Document Key</label>
+                            <p><code>{{selectedDocument.documentKey}}</code></p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Status</label>
+                            <p>
+                                <span class="badge badge-success">SIGNED</span>
+                            </p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Department</label>
+                            <p>{{selectedDocument.department}}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Signature Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Signed By</label>
+                            <p>{{selectedDocument.signedBy}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Signature Date</label>
+                            <p>{{selectedDocument.signedAt | date:'full'}}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Signature Hash</label>
+                            <p><code>{{selectedDocument.signature}}</code></p>
+                        </div>
+                    </div>
+
+                    <div class="signature-evidence" ng-if="signatureEvidence">
+                        <h4><i class="fas fa-shield-alt"></i> Signature Evidence</h4>
+                        <div class="evidence-grid">
+                            <div class="evidence-item">
+                                <i class="fas fa-network-wired"></i>
+                                <div>
+                                    <label>IP Address</label>
+                                    <p>{{signatureEvidence.ipAddress}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <label>Timestamp</label>
+                                    <p>{{signatureEvidence.timestamp | date:'full'}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <label>Method</label>
+                                    <p>{{signatureEvidence.method}}</p>
+                                </div>
+                            </div>
+                            <div class="evidence-item">
+                                <i class="fas fa-certificate"></i>
+                                <div>
+                                    <label>Certificate</label>
+                                    <p>{{signatureEvidence.certificate}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
