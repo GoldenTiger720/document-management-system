@@ -203,14 +203,44 @@ app.controller('DocumentSigningController', ['$scope', '$rootScope', '$location'
         }
     };
 
-    // Add attachment
-    $scope.addAttachment = function() {
-        var attachment = prompt('Enter attachment name (e.g., contract.pdf):');
-        if (attachment) {
-            $scope.uploadForm.attachments.push(attachment);
-            $scope.$apply();
-        }
+    // Trigger file input click
+    $scope.triggerFileInput = function() {
+        document.getElementById('fileInput').click();
     };
+
+    // Handle file selection
+    $scope.handleFileSelect = function(files) {
+        if (!files || files.length === 0) return;
+
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var fileObj = {
+                name: file.name,
+                size: file.size,
+                sizeFormatted: formatFileSize(file.size),
+                type: file.type,
+                extension: getFileExtension(file.name),
+                file: file
+            };
+            $scope.uploadForm.attachments.push(fileObj);
+        }
+
+        $scope.$apply();
+    };
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        var k = 1024;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // Get file extension
+    function getFileExtension(filename) {
+        return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toUpperCase();
+    }
 
     // Remove attachment
     $scope.removeAttachment = function(index) {

@@ -130,16 +130,32 @@ app.controller('UserController', ['$scope', '$rootScope', 'AuthService', 'UserSe
         }
     };
 
-    // Deactivate user
+    // Initialize deactivation modal state
+    $scope.showDeactivateModal = false;
+    $scope.userToDeactivate = null;
+
+    // Open deactivate confirmation modal
     $scope.deactivateUser = function(user) {
-        if (confirm('Are you sure you want to deactivate ' + user.name + '?')) {
-            try {
-                UserService.deactivateUser(user.id);
-                $rootScope.showToast('User deactivated successfully', 'success');
-                $scope.loadUsers();
-            } catch (error) {
-                $rootScope.showToast(error.message, 'error');
-            }
+        $scope.userToDeactivate = user;
+        $scope.showDeactivateModal = true;
+    };
+
+    // Close deactivate modal
+    $scope.closeDeactivateModal = function() {
+        $scope.showDeactivateModal = false;
+        $scope.userToDeactivate = null;
+    };
+
+    // Confirm and deactivate user
+    $scope.confirmDeactivateUser = function() {
+        try {
+            UserService.deactivateUser($scope.userToDeactivate.id);
+            $rootScope.showToast('User deactivated successfully', 'success');
+            $scope.closeDeactivateModal();
+            $scope.loadUsers();
+        } catch (error) {
+            $rootScope.showToast(error.message, 'error');
+            $scope.closeDeactivateModal();
         }
     };
 

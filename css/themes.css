@@ -1463,3 +1463,190 @@ body.dark-theme {
         width: 100%;
     }
 }
+
+/* File Upload Table Styles */
+.attachment-table {
+    margin: 1rem 0;
+    background: var(--bg-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.file-table thead {
+    background: var(--primary-color);
+    color: white;
+}
+
+.file-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.file-table td {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.file-table tbody tr {
+    transition: var(--transition);
+}
+
+.file-table tbody tr:hover {
+    background: var(--card-bg);
+}
+
+.file-table td i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+
+.file-table .fa-file-pdf {
+    color: #EF4444;
+}
+
+.file-table .fa-file-word {
+    color: #2563EB;
+}
+
+.file-table .fa-file-excel {
+    color: #10B981;
+}
+
+.file-table .fa-file-image {
+    color: #8B5CF6;
+}
+
+.file-hint {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* Confirmation Modal Styles */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.confirmation-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.confirmation-modal-content {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.confirmation-modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.confirmation-modal-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.confirmation-modal-icon.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.confirmation-modal-icon.danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.confirmation-modal-title {
+    flex: 1;
+}
+
+.confirmation-modal-title h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.confirmation-modal-title p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.confirmation-modal-body {
+    padding: 1.5rem;
+}
+
+.confirmation-modal-message {
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.confirmation-user-info {
+    background: var(--bg-color);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--warning-color);
+}
+
+.confirmation-user-info p {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.confirmation-user-info p:last-child {
+    margin-bottom: 0;
+}
+
+.confirmation-user-info strong {
+    color: var(--primary-color);
+}
+
+.confirmation-modal-actions {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

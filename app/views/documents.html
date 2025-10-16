@@ -156,18 +156,48 @@
                 </div>
                 <div class="form-group">
                     <label>Attachments</label>
-                    <div class="attachment-list">
-                        <div class="attachment-item" ng-repeat="attachment in uploadForm.attachments">
-                            <i class="fas fa-paperclip"></i>
-                            <span>{{attachment}}</span>
-                            <button type="button" ng-click="removeAttachment($index)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
+                    <input type="file"
+                           id="fileInput"
+                           multiple
+                           style="display: none;"
+                           onchange="angular.element(this).scope().handleFileSelect(this.files)">
+
+                    <div class="attachment-table" ng-if="uploadForm.attachments.length > 0">
+                        <table class="file-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-file"></i> File Name</th>
+                                    <th><i class="fas fa-hdd"></i> Size</th>
+                                    <th><i class="fas fa-tag"></i> Type</th>
+                                    <th><i class="fas fa-cog"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="file in uploadForm.attachments">
+                                    <td>
+                                        <i class="fas fa-file-pdf" ng-if="file.type === 'application/pdf'"></i>
+                                        <i class="fas fa-file-word" ng-if="file.type.includes('word')"></i>
+                                        <i class="fas fa-file-excel" ng-if="file.type.includes('sheet') || file.type.includes('excel')"></i>
+                                        <i class="fas fa-file-image" ng-if="file.type.includes('image')"></i>
+                                        <i class="fas fa-file-alt" ng-if="!file.type.includes('pdf') && !file.type.includes('word') && !file.type.includes('sheet') && !file.type.includes('excel') && !file.type.includes('image')"></i>
+                                        {{file.name}}
+                                    </td>
+                                    <td>{{file.sizeFormatted}}</td>
+                                    <td>{{file.extension}}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-danger" ng-click="removeAttachment($index)" title="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline" ng-click="addAttachment()">
-                        <i class="fas fa-plus"></i> Add Attachment
+
+                    <button type="button" class="btn btn-sm btn-outline" ng-click="triggerFileInput()">
+                        <i class="fas fa-paperclip"></i> Add Attachment
                     </button>
+                    <small class="file-hint">Select one or more files (PDF, DOC, XLS, images, etc.)</small>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" ng-click="closeUploadModal()">Cancel</button>

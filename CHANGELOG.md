@@ -215,3 +215,93 @@ The application is now more polished and user-friendly! 🚀
 **Version**: 1.1.0
 **Date**: 2025-10-16
 **Status**: ✅ Complete and Tested
+
+---
+
+## Version 1.2.0 - File Upload & Improved UX
+
+### 🎯 New Features
+
+#### 1. Real File Upload in Document Modal
+- **Added native file browser** to Upload Document modal
+- **File selection table** with professional display
+- **Multiple file selection** support
+- **File information display**:
+  - File name
+  - File size (formatted: KB, MB, GB)
+  - File type/extension
+  - File type icons (color-coded)
+- **Individual remove buttons** for each file
+- **File type icons**:
+  - PDF: Red icon
+  - Word: Blue icon
+  - Excel: Green icon
+  - Images: Purple icon
+  - Others: Gray icon
+
+#### 2. Beautiful Confirmation Modal for User Deactivation
+- **Replaced browser alert()** with custom modal
+- **Warning icon** with colored background
+- **Complete user information** display before deactivation
+- **Clear action buttons** (Cancel / Deactivate)
+- **Smooth animations** (slide-in effect)
+- **Click outside to close** functionality
+- **Consistent design** matching app theme
+
+### 📝 Modified Files
+
+1. **app/views/documents.html**
+   - Added file input with multiple attribute
+   - Added file display table
+   - Added file type icons
+   - Removed prompt-based attachment input
+
+2. **app/controllers/documentSigningController.js**
+   - Added `triggerFileInput()` function
+   - Added `handleFileSelect()` function
+   - Added `formatFileSize()` helper
+   - Added `getFileExtension()` helper
+   - Updated `removeAttachment()` for file objects
+
+3. **app/views/users.html**
+   - Added confirmation modal structure
+   - Added user information display
+   - Added modal actions (Cancel/Deactivate)
+
+4. **app/controllers/userController.js**
+   - Removed `confirm()` alert
+   - Added modal state management
+   - Added `closeDeactivateModal()` function
+   - Added `confirmDeactivateUser()` function
+
+5. **css/themes.css**
+   - Added file table styles (~100 lines)
+   - Added confirmation modal styles (~100 lines)
+   - Added file type icon colors
+   - Added modal animations
+
+### 🎨 UI/UX Improvements
+
+- **File Upload**: Professional table display with icons and formatted sizes
+- **Confirmation Modal**: Beautiful, informative modal with user details
+- **Consistency**: All elements now match app design language
+- **Accessibility**: Click outside modal to close, clear action buttons
+
+### 🐛 Bug Fixes
+
+- Fixed: No native alert() dialogs anymore
+- Fixed: Users can now see file details before upload
+- Fixed: Better visual feedback for file operations
+
+### 📊 Statistics
+
+- **Files Modified**: 5
+- **Lines Added**: ~380
+- **Features Added**: 2 major features
+- **UX Improvements**: Significant
+
+---
+
+**Release Date**: 2025-10-16
+**Version**: 1.2.0
+**Status**: ✅ Production Ready
